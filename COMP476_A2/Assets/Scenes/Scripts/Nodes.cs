@@ -5,7 +5,8 @@ using UnityEngine.UI;
 
 public class Nodes : MonoBehaviour
 {
-    public static List<GameObject> nodeList;
+    public static Dictionary<int, GameObject> nodesBook;
+    public static Dictionary<int, Dictionary<int, GameObject>> nodesLinkBook;
 
     public GameObject linkLine;
 
@@ -14,10 +15,9 @@ public class Nodes : MonoBehaviour
     void Start()
     {
         debug.text = "";
-        nodeList = new List<GameObject>();
         GameObject[] nodes = GameObject.FindGameObjectsWithTag("node");
-        Dictionary<int, GameObject> nodesBook = new Dictionary<int, GameObject>();
-        Dictionary<int, Dictionary<int,GameObject>> nodesLinkBook = new Dictionary<int, Dictionary<int, GameObject>>();
+        nodesBook = new Dictionary<int, GameObject>();
+        nodesLinkBook = new Dictionary<int, Dictionary<int, GameObject>>();
         //debug.text = "" + nodes.Length; 
         debug.text = "" + Vector3.Angle(new Vector3(0,0,1), new Vector3(1,0,-1).normalized);
         //initial nodes books

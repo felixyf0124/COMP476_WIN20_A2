@@ -63,11 +63,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scenes\Script\Character.cs" />
     <Compile Include="Assets\Scenes\Script\Debugger.cs" />
-    <Compile Include="Assets\Scenes\Script\GameController.cs" />
     <Compile Include="Assets\Scenes\Script\LastFrozen.cs" />
     <Compile Include="Assets\Scenes\Script\NewBehaviourScript.cs" />
+    <Compile Include="Assets\Scenes\Scripts\Colors.cs" />
+    <Compile Include="Assets\Scenes\Scripts\GameController.cs" />
     <Compile Include="Assets\Scenes\Scripts\MoveStrategy.cs" />
     <Compile Include="Assets\Scenes\Scripts\nodeLinkValidate.cs" />
     <Compile Include="Assets\Scenes\Scripts\Nodes.cs" />
