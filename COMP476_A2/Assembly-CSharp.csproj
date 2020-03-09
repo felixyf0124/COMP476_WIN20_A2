@@ -69,6 +69,8 @@
     <Compile Include="Assets\Scenes\Script\LastFrozen.cs" />
     <Compile Include="Assets\Scenes\Script\NewBehaviourScript.cs" />
     <Compile Include="Assets\Scenes\Scripts\MoveStrategy.cs" />
+    <Compile Include="Assets\Scenes\Scripts\nodeLinkValidate.cs" />
+    <Compile Include="Assets\Scenes\Scripts\Nodes.cs" />
     <None Include="Assets\materialImport\Valencia Fountain\Readme.txt" />
     <None Include="Assets\materialImport\HighQualityBricks&amp;Walls\Shaders\wood-877000.shader" />
     <None Include="Assets\materialImport\HighQualityBricks&amp;Walls\Shaders\patch-924648.shader" />
