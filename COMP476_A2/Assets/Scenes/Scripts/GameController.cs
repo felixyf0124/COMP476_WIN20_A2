@@ -15,14 +15,17 @@ public class GameController : MonoBehaviour
 
     List<GameObject> pickedNodes;
 
+    A_star aStar;
 
     // Start is called before the first frame update
     void Start()
     {
+        debug.text = "";
         isCTRL = false;
         disableCursor();
 
         pickedNodes = new List<GameObject>();
+        aStar = new A_star();
     }
 
     // Update is called once per frame
@@ -88,7 +91,7 @@ public class GameController : MonoBehaviour
                 //GameObject selected = hit.transform.GetComponent<GameObject>();
                 if(hit.transform.tag == "node")
                 {
-                    debug.text += pickedNodes.Count + "\n";
+                    debug.text += hit.transform.gameObject.GetHashCode() + "\n";
 
                     if (pickedNodes.Count < 2)
                     {
@@ -104,6 +107,18 @@ public class GameController : MonoBehaviour
                             hit.transform.GetComponent<Renderer>().material.color = new Color(255, 0, 0);
                         }
 
+                    }
+                    if (pickedNodes.Count == 2)
+                    {
+                        aStar.initial(pickedNodes[0].GetHashCode(), pickedNodes[1].GetHashCode());
+                        aStar.doDijkstra();
+                        List<KeyValuePair<string, MTuple>> path  = aStar.GetSolutionPath();
+                        debug.text = path[0].Value +"\n";
+                        foreach(KeyValuePair<string, MTuple> node in path)
+                        {
+                            Nodes.nodeBook[int.Parse(node.Key)].GetComponent<Renderer>().material.color
+                                = new Color(0.0f, 1.0f, 0.0f);
+                        }
                     }
                 }
             }

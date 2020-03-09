@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 
-struct MTuple
+public struct MTuple
 {
     // node hashcode
     public string hashNode;
@@ -44,6 +44,8 @@ public class A_star : MonoBehaviour
     string goal;
     string current;
 
+    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -56,7 +58,7 @@ public class A_star : MonoBehaviour
         
     }
 
-    void initial(int startNode, int goalNode)
+    public void initial(int startNode, int goalNode)
     {
         openList = new Dictionary<string, MTuple>();
         closedList = new Dictionary<string, MTuple>();
@@ -66,7 +68,7 @@ public class A_star : MonoBehaviour
     }
 
 
-    void doDijkstra()
+    public void doDijkstra()
     {
         if(openList.Count == 0)
         {
@@ -77,6 +79,7 @@ public class A_star : MonoBehaviour
         }
         else
         {
+
             List<KeyValuePair<string, MTuple>> sortedOpenList = openList.ToList();
             if (sortedOpenList.Count > 1)
             {
@@ -84,12 +87,24 @@ public class A_star : MonoBehaviour
             }
             MTuple node = sortedOpenList[0].Value;
             openList.Remove(node.hashNode);
-            closedList.Add(node.hashNode, node);
+            if (closedList.ContainsKey(node.hashNode))
+            {
+                Debug.Log("here" + node.hashNode + "|" + openList.Count);
+            }
+            
+
+            if (!closedList.ContainsKey(node.hashNode))
+            {
+                //Nodes.nodeBook[int.Parse(node.hashNode)].GetComponent<Renderer>().material.color = new Color(0.0f,1.0f,0.0f);
+                getChildren(node);
+                closedList.Add(node.hashNode, node);
+            }
+            Debug.Log("here2" + node.hashNode + "|" + openList.Count);
             if(goal != node.hashNode)
             {
-                getChildren(node);
+                doDijkstra();
             }
-
+            
         }
     }
 
@@ -105,20 +120,35 @@ public class A_star : MonoBehaviour
             float fn = gn;
             string childHashNode = childNode.Key.ToString();
             MTuple child = new MTuple(childHashNode, gn, node.hashNode, fn);
-
-            if (openList.ContainsKey(childHashNode))
+            
+            if(childHashNode != node.hashNode)
             {
-                if(openList[childHashNode].gn> gn)
+                if (openList.ContainsKey(childHashNode))
                 {
-                    openList[childHashNode] = child;
+                    if (openList[childHashNode].gn > gn)
+                    {
+                        openList[childHashNode] = child;
+                    }
                 }
-            }else if (!closedList.ContainsKey(childHashNode))
-            {
-                openList.Add(childHashNode, child);
+                else if (!closedList.ContainsKey(childHashNode))
+                {
+                    openList.Add(childHashNode, child);
+                }
             }
+            
             
         }
         
+    }
+
+    public List<KeyValuePair<string,MTuple>> GetSolutionPath()
+    {
+        List<KeyValuePair<string, MTuple>> sortedClosedList = closedList.ToList();
+        if (sortedClosedList.Count > 1)
+        {
+            sortedClosedList.Sort((a, b) => a.Value.fn.CompareTo(b.Value.fn));
+        }
+        return sortedClosedList;
     }
 
     
