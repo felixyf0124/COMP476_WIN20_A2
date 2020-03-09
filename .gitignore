@@ -3,3 +3,6 @@ COMP476_A2/Library/EditorInstance.json
 *.log
 COMP476_A2/Temp/UnityLockfile
 *.bakert
+COMP476_A2/Library/StateCache/Hierarchy
+COMP476_A2/Temp/__Backupscenes
+COMP476_A2/.vs/COMP476_A2/v16/Server
