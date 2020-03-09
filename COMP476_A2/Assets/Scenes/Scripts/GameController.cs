@@ -47,6 +47,16 @@ public class GameController : MonoBehaviour
             isCTRL = false;
             disableCursor();
         }
+
+        if (Input.GetKey(KeyCode.R))
+        {
+            for(int i = 0; i < pickedNodes.Count; ++i)
+            {
+                pickedNodes[i].GetComponent<Renderer>().material.color = Colors.lightBlue;
+            }
+
+            pickedNodes.Clear();
+        }
     }
 
     void enableCursor()

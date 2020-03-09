@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class Nodes : MonoBehaviour
 {
-    public static Dictionary<int, GameObject> nodesBook;
-    public static Dictionary<int, Dictionary<int, GameObject>> nodesLinkBook;
+    public static Dictionary<int, GameObject> nodeBook;
+    public static Dictionary<int, Dictionary<int, float>> edgeBook;
 
     public GameObject linkLine;
 
@@ -16,21 +16,21 @@ public class Nodes : MonoBehaviour
     {
         debug.text = "";
         GameObject[] nodes = GameObject.FindGameObjectsWithTag("node");
-        nodesBook = new Dictionary<int, GameObject>();
-        nodesLinkBook = new Dictionary<int, Dictionary<int, GameObject>>();
+        nodeBook = new Dictionary<int, GameObject>();
+        edgeBook = new Dictionary<int, Dictionary<int, float>>();
         //debug.text = "" + nodes.Length; 
         debug.text = "" + Vector3.Angle(new Vector3(0,0,1), new Vector3(1,0,-1).normalized);
         //initial nodes books
         for (int i=0;i<nodes.Length; ++i)
         {
             //debug.text += nodes[0].GetHashCode().ToString() + "\n";
-            nodesBook.Add(nodes[i].GetHashCode(), nodes[i]);
-            nodesLinkBook.Add(nodes[i].GetHashCode(), new Dictionary<int, GameObject>());
+            nodeBook.Add(nodes[i].GetHashCode(), nodes[i]);
+            edgeBook.Add(nodes[i].GetHashCode(), new Dictionary<int, float>());
         }
 
-        foreach(KeyValuePair<int, GameObject> nodeA in nodesBook)
+        foreach(KeyValuePair<int, GameObject> nodeA in nodeBook)
         {
-            foreach(KeyValuePair<int,GameObject> nodeB in nodesBook)
+            foreach(KeyValuePair<int,GameObject> nodeB in nodeBook)
             {
                 if(nodeA.Key != nodeB.Key)
                 {
@@ -58,7 +58,7 @@ public class Nodes : MonoBehaviour
                             link.transform.localScale = new Vector3(reScale.x, reScale.y, dirc.magnitude * reScale.z);
 
                             // add to the link book
-                            nodesLinkBook[nodeA.Key].Add(nodeB.Key, nodeB.Value);
+                            edgeBook[nodeA.Key].Add(nodeB.Key, dirc.magnitude);
                         }
                     }
                 }

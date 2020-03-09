@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scenes\Script\Debugger.cs" />
     <Compile Include="Assets\Scenes\Script\LastFrozen.cs" />
     <Compile Include="Assets\Scenes\Script\NewBehaviourScript.cs" />
+    <Compile Include="Assets\Scenes\Scripts\A_star.cs" />
     <Compile Include="Assets\Scenes\Scripts\Colors.cs" />
     <Compile Include="Assets\Scenes\Scripts\GameController.cs" />
     <Compile Include="Assets\Scenes\Scripts\MoveStrategy.cs" />
