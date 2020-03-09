@@ -5,8 +5,22 @@ Individual Assignment 2
 #### Lab Instructor: Majid Pourmemar
 
 
-## IDE Unity v. 2019.2.17f1
+### IDE Unity v. 2019.2.17f1
+
+- Most models & materials are imported from assets store.
 
 due `Monday, Mar 02`
+extended `Monday, Mar 09`
 
-git repo: https://github.com/felixyf0124/COMP476A1
+git repo: https://github.com/felixyf0124/COMP476_WIN20_A2
+
+Key Control
+
+Key | function | condition
+--- | --- | ---
+hold left `CTRL` | Enable Cursor | 
+left mouse click | Select Node | When Nodes are visible
+
+
+
+
