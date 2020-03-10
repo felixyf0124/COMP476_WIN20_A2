@@ -65,9 +65,12 @@
   <ItemGroup>
     <Compile Include="Assets\Scenes\Script\LastFrozen.cs" />
     <Compile Include="Assets\Scenes\Script\NewBehaviourScript.cs" />
-    <Compile Include="Assets\Scenes\Scripts\A_star.cs" />
+    <Compile Include="Assets\Scenes\Scripts\AStar.cs" />
+    <Compile Include="Assets\Scenes\Scripts\Cluster.cs" />
     <Compile Include="Assets\Scenes\Scripts\Colors.cs" />
     <Compile Include="Assets\Scenes\Scripts\Debugger.cs" />
+    <Compile Include="Assets\Scenes\Scripts\Dijkstra.cs" />
+    <Compile Include="Assets\Scenes\Scripts\Euclidean.cs" />
     <Compile Include="Assets\Scenes\Scripts\GameController.cs" />
     <Compile Include="Assets\Scenes\Scripts\MoveStrategy.cs" />
     <Compile Include="Assets\Scenes\Scripts\nodeLinkValidate.cs" />

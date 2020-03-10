@@ -19,7 +19,10 @@ Key Control
 Key | function | condition
 --- | --- | ---
 hold left `CTRL` | Enable Cursor | 
-left mouse click | Select Node | When Nodes are visible
+left mouse click | Select Node | When Nodes are visible & hold left `CTRL`
+`R` | Reset all nodes and links| When Nodes are visible
+`N` | Single node link toggle | Pick any node when the toggle is on
+
 
 
 

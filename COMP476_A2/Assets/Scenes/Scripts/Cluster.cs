@@ -1,16 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using System.Linq;
 
-
-public class Dijkstra : AStar
+public class Cluster : AStar
 {
-
-
-
-
     Dictionary<string, MTuple> openList { get; set; }
     Dictionary<string, MTuple> closedList { get; set; }
 
@@ -29,14 +23,17 @@ public class Dijkstra : AStar
     }
 
     /// <summary>
-    /// Dijkstra search
+    /// search with Cluster heuristic
     /// </summary>
     public void doSearch()
     {
-        if(openList.Count == 0)
+        if (openList.Count == 0)
         {
-            MTuple root = new MTuple(start, 0.0f, "", 0.0f);
-           
+            float gn = 0.0f;
+            float hn = getHeuristic(Nodes.nodeBook[int.Parse(start)].transform.position);
+            float fn = gn + hn;
+            MTuple root = new MTuple(start, gn, "", fn);
+
             openList.Add(start, root);
             doSearch();
         }
@@ -46,12 +43,22 @@ public class Dijkstra : AStar
             List<KeyValuePair<string, MTuple>> sortedOpenList = openList.ToList();
             if (sortedOpenList.Count > 1)
             {
-                sortedOpenList.Sort((a, b) => a.Value.gn.CompareTo(b.Value.gn));
+                sortedOpenList.Sort((a, b) => a.Value.fn.CompareTo(b.Value.fn));
             }
             MTuple node = sortedOpenList[0].Value;
 
+            foreach (KeyValuePair<string, MTuple> openNode in sortedOpenList)
+            {
+                Debug.Log("here [" + openNode.Value.hashNode + "|" + openNode.Value.gn + "|"
+                    + openNode.Value.edgeNode + "]\n");
+            }
 
             openList.Remove(node.hashNode);
+            if (closedList.ContainsKey(node.hashNode))
+            {
+                Debug.Log("here" + node.hashNode + "|" + openList.Count);
+            }
+
 
             if (!closedList.ContainsKey(node.hashNode))
             {
@@ -59,35 +66,39 @@ public class Dijkstra : AStar
                 //getChildren(node);
                 closedList.Add(node.hashNode, node);
             }
-            
-            if(goal != node.hashNode)
+
+            Debug.Log("here2" + node.hashNode + "|" + openList.Count);
+            if (goal != node.hashNode)
             {
                 getChildren(node);
                 //closedList.Add(node.hashNode, node);
                 doSearch();
             }
-            
+
         }
     }
 
 
     void getChildren(MTuple node)
     {
-        
+
         Dictionary<int, float> children = Nodes.edgeBook[int.Parse(node.hashNode)];
-        foreach(KeyValuePair<int, float> childNode in children)
+        foreach (KeyValuePair<int, float> childNode in children)
         {
             float gn = node.gn + childNode.Value;
-            float fn = gn;
+            float hn = getHeuristic(Nodes.nodeBook[childNode.Key].transform.position);
+            float fn = gn + hn;
             string childHashNode = childNode.Key.ToString();
             MTuple child = new MTuple(childHashNode, gn, node.hashNode, fn);
 
-            
+
+            Debug.Log("here ^ [" + child.hashNode + "|" + child.fn + "|"
+                    + child.edgeNode + "]\n");
             if (childHashNode != node.hashNode)
             {
                 if (openList.ContainsKey(childHashNode))
                 {
-                    if (openList[childHashNode].gn > gn)
+                    if (openList[childHashNode].fn > fn)
                     {
                         openList[childHashNode] = child;
                     }
@@ -96,13 +107,25 @@ public class Dijkstra : AStar
                 {
                     openList.Add(childHashNode, child);
                 }
-                
+
             }
-            
-            
+
+
         }
-        
+
     }
+
+    /// <summary>
+    /// Euclidean heuristic from tar to goal
+    /// </summary>
+    /// <param name="pos">tar's pos</param>
+    /// <returns></returns>
+    float getHeuristic(Vector3 pos)
+    {
+        Vector3 dir = Nodes.nodeBook[int.Parse(goal)].transform.position - pos;
+        return dir.magnitude;
+    }
+
 
     public Dictionary<string, MTuple> getClosedList()
     {
@@ -122,7 +145,7 @@ public class Dijkstra : AStar
         {
             sortedClosedList.Sort((a, b) => a.Value.fn.CompareTo(b.Value.fn));
         }
-       
+
 
         List<MTuple> solPath = new List<MTuple>();
         solPath.Add(sortedClosedList[sortedClosedList.Count - 1].Value);
@@ -136,7 +159,4 @@ public class Dijkstra : AStar
 
         return solPath;
     }
-
-
-
 }

@@ -11,12 +11,18 @@ public class GameController : MonoBehaviour
 
     public Text debug;
 
+    public Text gameState;
+
 
     bool isCTRL;
 
     bool toggleSingleNodeLink;
 
     List<GameObject> pickedNodes;
+
+    string searchModeTXT;
+
+    int searchMode;
 
     AStar aStar;
 
@@ -27,9 +33,10 @@ public class GameController : MonoBehaviour
         isCTRL = false;
         toggleSingleNodeLink = false;
         disableCursor();
-
+        
         pickedNodes = new List<GameObject>();
-        aStar = new Dijkstra();
+
+        switchSearchMode(2);
     }
 
     // Update is called once per frame
@@ -89,6 +96,24 @@ public class GameController : MonoBehaviour
                 disableCursor();
             }
 
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            resetNodesAndLinks();
+            switchSearchMode(1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            resetNodesAndLinks();
+            switchSearchMode(2);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            resetNodesAndLinks();
+            switchSearchMode(3);
         }
 
     }
@@ -327,6 +352,67 @@ public class GameController : MonoBehaviour
     {
         Nodes.nodeBook[hashNode].GetComponent<Renderer>().material.color
                 = col;
+    }
+
+
+
+    void switchSearchMode(int i)
+    {
+        switch (i)
+        {
+            case 1:
+                searchMode = 1;
+                searchModeTXT = "Search Mode: \n"
+                + "g(n): cost-so-far \n"
+                + "h(n): null \n";
+
+                resetNodesAndLinks();
+                aStar = new Dijkstra();
+                if(pickedNodes.Count == 2)
+                {
+                    aStar.initial(pickedNodes[0].GetHashCode(), pickedNodes[1].GetHashCode());
+                    aStar.doSearch();
+
+                    Dictionary<string, MTuple> openList = aStar.getOpenList();
+
+                    Dictionary<string, MTuple> closedList = aStar.getClosedList();
+
+                    List<MTuple> path = aStar.GetSolutionPath();
+
+                    colorPathFindingResult(openList, closedList, path);
+                }
+
+                break;
+
+            case 2:
+                searchMode = 2;
+                searchModeTXT = "Search Mode: \n"
+                + "g(n): cost-so-far \n"
+                + "h(n): Euclidean \n";
+
+                aStar = new Euclidean();
+                if (pickedNodes.Count == 2)
+                {
+                    aStar.initial(pickedNodes[0].GetHashCode(), pickedNodes[1].GetHashCode());
+                    aStar.doSearch();
+
+                    Dictionary<string, MTuple> openList = aStar.getOpenList();
+
+                    Dictionary<string, MTuple> closedList = aStar.getClosedList();
+
+                    List<MTuple> path = aStar.GetSolutionPath();
+
+                    colorPathFindingResult(openList, closedList, path);
+                }
+
+                break;
+            case 3:
+                searchMode = 3;
+                searchModeTXT = "Search Mode: \n"
+                + "g(n): cost-so-far \n"
+                + "h(n): Cluster \n";
+                break;
+        }
     }
 
 }
