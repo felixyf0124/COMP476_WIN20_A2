@@ -40,7 +40,9 @@ public interface AStar
 
     Dictionary<string, MTuple> getClosedList();
 
-    List<MTuple> GetSolutionPath();
+    List<MTuple> getSolutionPath();
+
+    void filterSolutionPath();
 
 
 

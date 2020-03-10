@@ -182,7 +182,7 @@ public class GameController : MonoBehaviour
                         
                         Dictionary<string, MTuple> closedList = aStar.getClosedList();
                         
-                        List<MTuple> path  = aStar.GetSolutionPath();
+                        List<MTuple> path  = aStar.getSolutionPath();
 
                         colorPathFindingResult(openList, closedList, path);
                         
@@ -314,12 +314,12 @@ public class GameController : MonoBehaviour
                     if (hit.transform.tag == "node")
                     {
                         debug.text += hit.transform.gameObject.GetHashCode() + "\n";
-                        if (pickedNodes.Count == 1) 
+                        if (pickedNodes.Count >0) 
                         {
                             pickedNodes.Clear(); 
-                            resetNodesAndLinks();
-
                         }
+
+                        resetNodesAndLinks();
                         int nodeHash = hit.transform.gameObject.GetHashCode();
 
                         hit.transform.GetComponent<Renderer>().material.color = Color.red;
@@ -377,7 +377,7 @@ public class GameController : MonoBehaviour
 
                     Dictionary<string, MTuple> closedList = aStar.getClosedList();
 
-                    List<MTuple> path = aStar.GetSolutionPath();
+                    List<MTuple> path = aStar.getSolutionPath();
 
                     colorPathFindingResult(openList, closedList, path);
                 }
@@ -400,7 +400,7 @@ public class GameController : MonoBehaviour
 
                     Dictionary<string, MTuple> closedList = aStar.getClosedList();
 
-                    List<MTuple> path = aStar.GetSolutionPath();
+                    List<MTuple> path = aStar.getSolutionPath();
 
                     colorPathFindingResult(openList, closedList, path);
                 }

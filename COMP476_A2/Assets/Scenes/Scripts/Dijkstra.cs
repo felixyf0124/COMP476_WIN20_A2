@@ -18,11 +18,13 @@ public class Dijkstra : AStar
     string goal { get; set; }
     string current { get; set; }
 
+    List<MTuple> solutionPath { get; set; }
 
     public void initial(int startNode, int goalNode)
     {
         this.openList = new Dictionary<string, MTuple>();
         closedList = new Dictionary<string, MTuple>();
+        solutionPath = new List<MTuple>();
         start = startNode.ToString();
         goal = goalNode.ToString();
         current = "";
@@ -66,7 +68,11 @@ public class Dijkstra : AStar
                 //closedList.Add(node.hashNode, node);
                 doSearch();
             }
-            
+            else
+            {
+                filterSolutionPath();
+            }
+
         }
     }
 
@@ -114,15 +120,14 @@ public class Dijkstra : AStar
         return openList;
     }
 
-
-    public List<MTuple> GetSolutionPath()
+    public void filterSolutionPath()
     {
         List<KeyValuePair<string, MTuple>> sortedClosedList = closedList.ToList();
         if (sortedClosedList.Count > 1)
         {
             sortedClosedList.Sort((a, b) => a.Value.fn.CompareTo(b.Value.fn));
         }
-       
+
 
         List<MTuple> solPath = new List<MTuple>();
         solPath.Add(sortedClosedList[sortedClosedList.Count - 1].Value);
@@ -134,9 +139,12 @@ public class Dijkstra : AStar
         }
         solPath.Reverse();
 
-        return solPath;
+        solutionPath = solPath;
     }
 
-
+    public List<MTuple> getSolutionPath()
+    {
+        return solutionPath;
+    }
 
 }

@@ -12,11 +12,13 @@ public class Euclidean : AStar
     string goal { get; set; }
     string current { get; set; }
 
+    List<MTuple> solutionPath { get; set; }
 
     public void initial(int startNode, int goalNode)
     {
         this.openList = new Dictionary<string, MTuple>();
         closedList = new Dictionary<string, MTuple>();
+        solutionPath = new List<MTuple>();
         start = startNode.ToString();
         goal = goalNode.ToString();
         current = "";
@@ -47,18 +49,7 @@ public class Euclidean : AStar
             }
             MTuple node = sortedOpenList[0].Value;
 
-            foreach (KeyValuePair<string, MTuple> openNode in sortedOpenList)
-            {
-                Debug.Log("here [" + openNode.Value.hashNode + "|" + openNode.Value.gn + "|"
-                    + openNode.Value.edgeNode + "]\n");
-            }
-
             openList.Remove(node.hashNode);
-            if (closedList.ContainsKey(node.hashNode))
-            {
-                Debug.Log("here" + node.hashNode + "|" + openList.Count);
-            }
-
 
             if (!closedList.ContainsKey(node.hashNode))
             {
@@ -67,12 +58,15 @@ public class Euclidean : AStar
                 closedList.Add(node.hashNode, node);
             }
 
-            Debug.Log("here2" + node.hashNode + "|" + openList.Count);
             if (goal != node.hashNode)
             {
                 getChildren(node);
                 //closedList.Add(node.hashNode, node);
                 doSearch();
+            }
+            else
+            {
+                filterSolutionPath();
             }
 
         }
@@ -91,9 +85,6 @@ public class Euclidean : AStar
             string childHashNode = childNode.Key.ToString();
             MTuple child = new MTuple(childHashNode, gn, node.hashNode, fn);
 
-
-            Debug.Log("here ^ [" + child.hashNode + "|" + child.fn + "|"
-                    + child.edgeNode + "]\n");
             if (childHashNode != node.hashNode)
             {
                 if (openList.ContainsKey(childHashNode))
@@ -138,7 +129,7 @@ public class Euclidean : AStar
     }
 
 
-    public List<MTuple> GetSolutionPath()
+    public void filterSolutionPath()
     {
         List<KeyValuePair<string, MTuple>> sortedClosedList = closedList.ToList();
         if (sortedClosedList.Count > 1)
@@ -157,6 +148,12 @@ public class Euclidean : AStar
         }
         solPath.Reverse();
 
-        return solPath;
+        solutionPath = solPath;
     }
+
+    public List<MTuple> getSolutionPath()
+    {
+        return solutionPath;
+    }
+
 }
