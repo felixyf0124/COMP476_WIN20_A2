@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public struct MTuple
@@ -44,12 +45,13 @@ public class A_star : MonoBehaviour
     string goal;
     string current;
 
-    
+
+    Text debug;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        debug = Debugger.debugger;
     }
 
     // Update is called once per frame
@@ -99,6 +101,7 @@ public class A_star : MonoBehaviour
                 getChildren(node);
                 closedList.Add(node.hashNode, node);
             }
+            
             Debug.Log("here2" + node.hashNode + "|" + openList.Count);
             if(goal != node.hashNode)
             {
@@ -134,6 +137,20 @@ public class A_star : MonoBehaviour
                 {
                     openList.Add(childHashNode, child);
                 }
+                else 
+                {
+                    //  if it's already in the closedlist
+                    //  then check which one has minimum gn
+                    //  if the one in the closed list has the minimum one then
+                    //  bring it back to openlist
+                    //if (closedList[childHashNode].gn < gn)
+                    //{
+                    //    MTuple bringBack = closedList[childHashNode];
+                    //    closedList.Remove(childHashNode);
+                    //    openList.Add(childHashNode, bringBack);
+                    //}
+
+                }
             }
             
             
@@ -141,16 +158,39 @@ public class A_star : MonoBehaviour
         
     }
 
-    public List<KeyValuePair<string,MTuple>> GetSolutionPath()
+    public Dictionary<string, MTuple> getClosedList()
+    {
+        return closedList;
+    }
+
+    public Dictionary<string, MTuple> getOpenList()
+    {
+        return openList;
+    }
+
+
+    public List<MTuple> GetSolutionPath()
     {
         List<KeyValuePair<string, MTuple>> sortedClosedList = closedList.ToList();
         if (sortedClosedList.Count > 1)
         {
             sortedClosedList.Sort((a, b) => a.Value.fn.CompareTo(b.Value.fn));
         }
-        return sortedClosedList;
+       
+
+        List<MTuple> solPath = new List<MTuple>();
+        solPath.Add(sortedClosedList[sortedClosedList.Count - 1].Value);
+        string parent = solPath[solPath.Count - 1].edgeNode;
+        while (parent != "")
+        {
+            solPath.Add(closedList[parent]);
+            parent = closedList[parent].edgeNode;
+        }
+        solPath.Reverse();
+
+        return solPath;
     }
 
-    
-    
+
+
 }

@@ -5,5 +5,5 @@ using UnityEngine.UI;
 
 public class Debugger : MonoBehaviour
 {
-    public Text debugger;
+    public static Text debugger;
 }
