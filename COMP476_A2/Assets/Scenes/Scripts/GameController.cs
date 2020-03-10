@@ -14,19 +14,22 @@ public class GameController : MonoBehaviour
 
     bool isCTRL;
 
+    bool toggleSingleNodeLink;
+
     List<GameObject> pickedNodes;
 
-    A_star aStar;
+    AStar aStar;
 
     // Start is called before the first frame update
     void Start()
     {
         debug.text = "";
         isCTRL = false;
+        toggleSingleNodeLink = false;
         disableCursor();
 
         pickedNodes = new List<GameObject>();
-        aStar = new A_star();
+        aStar = new Dijkstra();
     }
 
     // Update is called once per frame
@@ -35,7 +38,15 @@ public class GameController : MonoBehaviour
         //Nodes.nodesBook;
         inputListener();
 
-        onMouseSelect();
+        if (isCTRL)
+        {
+            onMouseSelect();
+        }
+
+        if (!isCTRL && toggleSingleNodeLink)
+        {
+            displaySingleNodeLink();
+        }
     }
 
     void inputListener()
@@ -54,14 +65,32 @@ public class GameController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.R))
         {
-            for(int i = 0; i < pickedNodes.Count; ++i)
-            {
-                pickedNodes[i].GetComponent<Renderer>().material.color = Colors.lightBlue;
-            }
+            //for(int i = 0; i < pickedNodes.Count; ++i)
+            //{
+            //    pickedNodes[i].GetComponent<Renderer>().material.color = Colors.lightBlue;
+            //}
 
             pickedNodes.Clear();
             resetNodesAndLinks();
         }
+
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            toggleSingleNodeLink = !toggleSingleNodeLink;
+            if (toggleSingleNodeLink)
+            {
+                enableCursor();
+                pickedNodes.Clear();
+
+                resetNodesAndLinks();
+            }
+            else
+            {
+                disableCursor();
+            }
+
+        }
+
     }
 
     void enableCursor()
@@ -122,7 +151,7 @@ public class GameController : MonoBehaviour
                     if (pickedNodes.Count == 2)
                     {
                         aStar.initial(pickedNodes[0].GetHashCode(), pickedNodes[1].GetHashCode());
-                        aStar.doDijkstra();
+                        aStar.doSearch();
 
                         Dictionary<string, MTuple> openList = aStar.getOpenList();
                         
@@ -146,13 +175,18 @@ public class GameController : MonoBehaviour
     /// <param name="path"></param>
     void colorPathFindingResult(Dictionary<string, MTuple> openList, Dictionary<string, MTuple> closedList, List<MTuple> path)
     {
+        debug.text += "------" + "\n";
+
         foreach (KeyValuePair<string, MTuple> node in openList)
         {
+            debug.text += node.Value.hashNode + "|" + node.Value.gn + "|" + node.Value.edgeNode + "\n";
+
             Nodes.nodeBook[int.Parse(node.Key)].GetComponent<Renderer>().material.color
                 = new Color(1.0f, 1.0f, 1.0f);
         }
         foreach (KeyValuePair<string, MTuple> node in closedList)
         {
+            debug.text += node.Value.hashNode + "|" + node.Value.gn + "|" + node.Value.edgeNode + "\n";
             Nodes.nodeBook[int.Parse(node.Key)].GetComponent<Renderer>().material.color
                 = new Color(0.0f, 0.0f, 0.0f);
         }
@@ -238,6 +272,61 @@ public class GameController : MonoBehaviour
             linkRenderer.SetWidth(0.1f, 0.1f);
         }
 
+    }
+
+
+    void displaySingleNodeLink()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if(Cursor.visible && toggleSingleNodeLink)
+            {
+                Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit))
+                {
+                    //GameObject selected = hit.transform.GetComponent<GameObject>();
+                    if (hit.transform.tag == "node")
+                    {
+                        debug.text += hit.transform.gameObject.GetHashCode() + "\n";
+                        if (pickedNodes.Count == 1) 
+                        {
+                            pickedNodes.Clear(); 
+                            resetNodesAndLinks();
+
+                        }
+                        int nodeHash = hit.transform.gameObject.GetHashCode();
+
+                        hit.transform.GetComponent<Renderer>().material.color = Color.red;
+
+                        foreach(Transform link in hit.transform)
+                        {
+                            if(link.tag == "link")
+                            {
+                                link.localPosition = new Vector3(0.0f, 0.1f, 0.0f);
+                                LineRenderer linkRenderer = link.gameObject.GetComponent<LineRenderer>();
+                                linkRenderer.startColor = Color.red;
+                                linkRenderer.endColor = Color.yellow;
+                                linkRenderer.SetWidth(0.6f, 0.6f);
+                            }
+                        }
+
+                        foreach(KeyValuePair<int,float> child in Nodes.edgeBook[nodeHash])
+                        {
+                            colorNode(child.Key, Color.yellow);
+                        }
+
+                    }
+                }
+            }
+        }
+
+    }
+
+    void colorNode(int hashNode, Color col)
+    {
+        Nodes.nodeBook[hashNode].GetComponent<Renderer>().material.color
+                = col;
     }
 
 }

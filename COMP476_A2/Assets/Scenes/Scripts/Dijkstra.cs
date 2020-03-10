@@ -5,79 +5,81 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public struct MTuple
+//public struct MTuple
+//{
+//    // node hashcode
+//    public string hashNode;
+//    // cost-so-far
+//    public float gn;
+//    // edge (parent) node hashcode
+//    public string edgeNode;
+//    // total-cost
+//    public float fn;
+
+//    /// <summary>
+//    /// where edgeNode is the parent's hashcode
+//    /// </summary>
+//    /// <param name="hashNode"></param>
+//    /// <param name="gn"></param>
+//    /// <param name="edgeNode">parent's hashcode</param>
+//    /// <param name="fn"></param>
+//    public MTuple(string hashNode, float gn, string edgeNode, float fn)
+//    {
+//        this.hashNode = hashNode;
+//        this.gn = gn;
+//        this.edgeNode = edgeNode;
+//        this.fn = fn;
+//    }
+//}
+
+public class Dijkstra : AStar
 {
-    // node hashcode
-    public string hashNode;
-    // cost-so-far
-    public float gn;
-    // edge (parent) node hashcode
-    public string edgeNode;
-    // total-cost
-    public float fn;
-
-    /// <summary>
-    /// where edgeNode is the parent's hashcode
-    /// </summary>
-    /// <param name="hashNode"></param>
-    /// <param name="gn"></param>
-    /// <param name="edgeNode">parent's hashcode</param>
-    /// <param name="fn"></param>
-    public MTuple(string hashNode, float gn, string edgeNode, float fn)
-    {
-        this.hashNode = hashNode;
-        this.gn = gn;
-        this.edgeNode = edgeNode;
-        this.fn = fn;
-    }
-}
-
-public class A_star : MonoBehaviour
-{
 
 
 
 
-    Dictionary<string, MTuple> openList;
-    Dictionary<string, MTuple> closedList;
+    Dictionary<string, MTuple> openList { get; set; }
+    Dictionary<string, MTuple> closedList { get; set; }
 
-    string start;
-    string goal;
-    string current;
+    string start { get; set; }
+    string goal { get; set; }
+    string current { get; set; }
 
 
-    Text debug;
+    //Text debug;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        debug = Debugger.debugger;
-    }
+    //// Start is called before the first frame update
+    //void Start()
+    //{
+    //    debug = Debugger.debugger;
+    //}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    //// Update is called once per frame
+    //void Update()
+    //{
+
+    //}
 
     public void initial(int startNode, int goalNode)
     {
-        openList = new Dictionary<string, MTuple>();
+        this.openList = new Dictionary<string, MTuple>();
         closedList = new Dictionary<string, MTuple>();
         start = startNode.ToString();
         goal = goalNode.ToString();
         current = "";
     }
 
-
-    public void doDijkstra()
+    /// <summary>
+    /// Dijkstra search
+    /// </summary>
+    public void doSearch()
     {
         if(openList.Count == 0)
         {
             MTuple root = new MTuple(start, 0.0f, "", 0.0f);
            
             openList.Add(start, root);
-            doDijkstra();
+            doSearch();
         }
         else
         {
@@ -88,6 +90,13 @@ public class A_star : MonoBehaviour
                 sortedOpenList.Sort((a, b) => a.Value.gn.CompareTo(b.Value.gn));
             }
             MTuple node = sortedOpenList[0].Value;
+
+            foreach(KeyValuePair<string, MTuple> openNode in sortedOpenList)
+            {
+                Debug.Log("here [" + openNode.Value.hashNode + "|" + openNode.Value.gn + "|" 
+                    + openNode.Value.edgeNode + "]\n");
+            }
+
             openList.Remove(node.hashNode);
             if (closedList.ContainsKey(node.hashNode))
             {
@@ -98,14 +107,16 @@ public class A_star : MonoBehaviour
             if (!closedList.ContainsKey(node.hashNode))
             {
                 //Nodes.nodeBook[int.Parse(node.hashNode)].GetComponent<Renderer>().material.color = new Color(0.0f,1.0f,0.0f);
-                getChildren(node);
+                //getChildren(node);
                 closedList.Add(node.hashNode, node);
             }
             
             Debug.Log("here2" + node.hashNode + "|" + openList.Count);
             if(goal != node.hashNode)
             {
-                doDijkstra();
+                getChildren(node);
+                //closedList.Add(node.hashNode, node);
+                doSearch();
             }
             
         }
@@ -123,8 +134,11 @@ public class A_star : MonoBehaviour
             float fn = gn;
             string childHashNode = childNode.Key.ToString();
             MTuple child = new MTuple(childHashNode, gn, node.hashNode, fn);
+
             
-            if(childHashNode != node.hashNode)
+            Debug.Log("here ^ [" + child.hashNode + "|" + child.gn + "|"
+                    + child.edgeNode + "]\n");
+            if (childHashNode != node.hashNode)
             {
                 if (openList.ContainsKey(childHashNode))
                 {
@@ -137,20 +151,7 @@ public class A_star : MonoBehaviour
                 {
                     openList.Add(childHashNode, child);
                 }
-                else 
-                {
-                    //  if it's already in the closedlist
-                    //  then check which one has minimum gn
-                    //  if the one in the closed list has the minimum one then
-                    //  bring it back to openlist
-                    //if (closedList[childHashNode].gn < gn)
-                    //{
-                    //    MTuple bringBack = closedList[childHashNode];
-                    //    closedList.Remove(childHashNode);
-                    //    openList.Add(childHashNode, bringBack);
-                    //}
-
-                }
+                
             }
             
             

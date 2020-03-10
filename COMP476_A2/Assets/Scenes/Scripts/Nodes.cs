@@ -46,7 +46,7 @@ public class Nodes : MonoBehaviour
 
                     int layerMaskFixedOnly = LayerMask.GetMask("fixed");
                     RaycastHit hit;
-                    if (Physics.Raycast(nodeA.Value.transform.position,dirc.normalized,out hit, 80.0f, layerMaskFixedOnly))
+                    if (Physics.Raycast(nodeA.Value.transform.position,dirc.normalized,out hit, 1000.0f, layerMaskFixedOnly))
                     {
                         if (hit.distance > dirc.magnitude)
                         {
@@ -71,4 +71,5 @@ public class Nodes : MonoBehaviour
     {
         
     }
+    
 }
