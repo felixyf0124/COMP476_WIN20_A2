@@ -8,6 +8,7 @@ TagManager:
   - fixed
   - link
   - cluster
+  - it
   layers:
   - Default
   - TransparentFX
