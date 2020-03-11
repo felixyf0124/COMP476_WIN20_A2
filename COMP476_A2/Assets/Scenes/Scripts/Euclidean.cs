@@ -5,11 +5,11 @@ using System.Linq;
 
 public class Euclidean : AStar
 {
-    Dictionary<string, MTuple> openList { get; set; }
-    Dictionary<string, MTuple> closedList { get; set; }
+    public Dictionary<string, MTuple> openList { get; set; }
+    public Dictionary<string, MTuple> closedList { get; set; }
 
-    string start { get; set; }
-    string goal { get; set; }
+    public string start { get; set; }
+    public string goal { get; set; }
     string current { get; set; }
 
     List<MTuple> solutionPath { get; set; }

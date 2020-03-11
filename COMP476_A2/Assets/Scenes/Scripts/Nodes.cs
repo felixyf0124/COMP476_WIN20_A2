@@ -4,6 +4,56 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
+public struct ClusterPath
+{
+    public float cost { get; set; }
+    public List<string> path { get; set; }
+
+    public ClusterPath(float cost, List<string> path)
+    {
+        this.cost = cost;
+        this.path = path;
+    }
+
+    public ClusterPath(ClusterPath cPath)
+    {
+        this.cost = cPath.cost;
+        this.path = cPath.path;
+    }
+
+    public string getFirst()
+    {
+        if (path.Count > 0)
+        {
+            return path[0];
+
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public string getLast()
+    {
+        if (path.Count > 0)
+        {
+            return path[path.Count - 1];
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public List<string> getPath()
+    {
+        List<string> pathCopy = new List<string>(path.ToArray());
+
+        return pathCopy;
+    }
+
+}
 
 public class Nodes : MonoBehaviour
 {
@@ -11,8 +61,8 @@ public class Nodes : MonoBehaviour
     public static Dictionary<int, Dictionary<int, float>> edgeBook;
     public static Dictionary<int, HashSet<int>> clusterBook;
 
-    // <cluster hashcode, <cluster hash code, closest hash node>
-    public static Dictionary<int, Dictionary<int, int>> clusterTable;
+    // <cluster hashcode, <cluster hash code, closest hash node path>
+    public static Dictionary<int, Dictionary<int, ClusterPath>> clusterTable;
 
     public GameObject linkLine;
 
@@ -26,7 +76,7 @@ public class Nodes : MonoBehaviour
         nodeBook = new Dictionary<int, GameObject>();
         edgeBook = new Dictionary<int, Dictionary<int, float>>();
         clusterBook = new Dictionary<int, HashSet<int>>();
-        clusterTable = new Dictionary<int, Dictionary<int, int>>();
+        clusterTable = new Dictionary<int, Dictionary<int, ClusterPath>>();
         //debug.text = "" + nodes.Length; 
         //debug.text = "" + Vector3.Angle(new Vector3(0,0,1), new Vector3(1,0,-1).normalized);
 
@@ -34,7 +84,7 @@ public class Nodes : MonoBehaviour
         for (int i = 0; i < clusters.Length; ++i)
         {
             clusterBook.Add(clusters[i].GetHashCode(), new HashSet<int>());
-            clusterTable.Add(clusters[i].GetHashCode(), new Dictionary<int, int>());
+            clusterTable.Add(clusters[i].GetHashCode(), new Dictionary<int, ClusterPath>());
         }
 
 
@@ -120,7 +170,8 @@ public class Nodes : MonoBehaviour
                 {
                     int cluHC2 = clusters[j].GetHashCode();
 
-                    List<int> shortestHashNodePair = new List<int>();
+                    //List<int> shortestHashNodePair = new List<int>();
+                    ClusterPath cPath =  new ClusterPath();
                     float shortestDistance = -1.0f;
 
                     foreach (int hashNode in clusterBook[cluHC])
@@ -130,39 +181,21 @@ public class Nodes : MonoBehaviour
                             aStar.initial(hashNode, hashNode2);
                             aStar.doSearch();
                             List<MTuple> path = aStar.getSolutionPath();
+                            
 
-                            bool isEitherCluster = true;
-
-                            for (int k = 0; k < path.Count; ++k)
+                            if (shortestDistance < 0)
                             {
-                                if (clusterBook[cluHC].Contains(int.Parse(path[k].hashNode))
-                                    || clusterBook[cluHC2].Contains(int.Parse(path[k].hashNode)))
-                                {
-                                    //continue;
-                                }
-                                else
-                                {
-                                    isEitherCluster = false;
-                                    break;
-                                }
+                                cPath = toClusterPath(path);
+                                shortestDistance = cPath.cost;
                             }
-                            if (isEitherCluster)
+                            if (shortestDistance > 0)
                             {
-                                if (shortestDistance < 0)
+                                ClusterPath tempClusterPath= toClusterPath(path);
+
+                                if (tempClusterPath.cost < shortestDistance)
                                 {
-                                    shortestHashNodePair.Add(int.Parse(path[0].hashNode));
-                                    shortestHashNodePair.Add(int.Parse(path[path.Count - 1].hashNode));
-                                    shortestDistance = getTotalCost(path);
-                                }
-                                if (shortestDistance > 0)
-                                {
-                                    float distance = getTotalCost(path);
-                                    if (distance < shortestDistance)
-                                    {
-                                        shortestDistance = distance;
-                                        shortestHashNodePair.Add(int.Parse(path[0].hashNode));
-                                        shortestHashNodePair.Add(int.Parse(path[path.Count - 1].hashNode));
-                                    }
+                                    shortestDistance = tempClusterPath.cost;
+                                    cPath = tempClusterPath;
                                 }
                             }
                         }
@@ -171,52 +204,34 @@ public class Nodes : MonoBehaviour
                     // there is a direct short path between two cluster
                     if (shortestDistance > 0)
                     {
-                        if (clusterBook[cluHC].Contains(shortestHashNodePair[0])) {
 
-                            if (clusterTable[cluHC].ContainsKey(cluHC2))
-                            {
-                                clusterTable[cluHC][cluHC2] = shortestHashNodePair[1];
-                            }
-                            else
-                            {
-                                clusterTable[cluHC]
-                                    .Add(cluHC2, shortestHashNodePair[1]);
-                            }
-
-                            if (clusterTable[cluHC2].ContainsKey(cluHC))
-                            {
-                                clusterTable[cluHC2][cluHC] = shortestHashNodePair[0];
-                            }
-                            else
-                            {
-                                clusterTable[cluHC2]
-                                    .Add(cluHC, shortestHashNodePair[0]);
-                            }
-
+                        if (clusterTable[cluHC].ContainsKey(cluHC2))
+                        {
+                            clusterTable[cluHC][cluHC2] = cPath;
                         }
                         else
                         {
-                            if (clusterTable[cluHC].ContainsKey(cluHC2))
-                            {
-                                clusterTable[cluHC][cluHC2] = shortestHashNodePair[0];
-                            }
-                            else
-                            {
-                                clusterTable[cluHC]
-                                    .Add(cluHC2, shortestHashNodePair[0]);
-                            }
-
-                            if (clusterTable[cluHC2].ContainsKey(cluHC))
-                            {
-                                clusterTable[cluHC2][cluHC] = shortestHashNodePair[1];
-                            }
-                            else
-                            {
-                                clusterTable[cluHC2]
-                                    .Add(cluHC, shortestHashNodePair[1]);
-                            }
-
+                            clusterTable[cluHC]
+                                .Add(cluHC2, cPath);
                         }
+
+                        ClusterPath cPathReverse = new ClusterPath(cPath.cost, cPath.getPath());
+                        cPathReverse.path.Reverse();
+                        if (clusterTable[cluHC2].ContainsKey(cluHC))
+                        {
+                            clusterTable[cluHC2][cluHC] = cPathReverse;
+                        }
+                        else
+                        {
+                            clusterTable[cluHC2]
+                                .Add(cluHC, cPathReverse);
+                        }
+
+                        //if (clusterBook[cluHC].Contains(int.Parse(cPath.getFirst()))) {
+
+                            
+
+                        //}
 
                     }
 
@@ -232,18 +247,24 @@ public class Nodes : MonoBehaviour
     /// </summary>
     /// <param name="path"></param>
     /// <returns></returns>
-    float getTotalCost(List<MTuple> path)
+    ClusterPath toClusterPath(List<MTuple> path)
     {
+        ClusterPath cPath;
         float ttlCost = 0.0f;
-
-        for(int i = 0; i < path.Count - 1; ++i)
+        List<string> pathHC = new List<string>();
+        pathHC.Add(path[0].hashNode);
+        for (int i = 0; i < path.Count - 1; ++i)
         {
             Vector3 nodePos = nodeBook[int.Parse(path[i].hashNode)].transform.position;
             Vector3 nodePos1 = nodeBook[int.Parse(path[i+1].hashNode)].transform.position;
             Vector3 dir = nodePos - nodePos1;
             ttlCost += dir.magnitude;
+            pathHC.Add(path[i + 1].hashNode);
         }
-        return ttlCost;
+
+        cPath = new ClusterPath(ttlCost,pathHC);
+
+        return cPath;
     }
 
 }

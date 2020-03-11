@@ -10,9 +10,17 @@ public class Cluster : AStar
 
     string start { get; set; }
     string goal { get; set; }
+
+    string startCluster { get; set; }
+    string goalCluster { get; set; }
+
     string current { get; set; }
 
     List<MTuple> solutionPath { get; set; }
+
+    string innerStart;
+    string innerGoal;
+
 
     public void initial(int startNode, int goalNode)
     {
@@ -21,6 +29,12 @@ public class Cluster : AStar
         solutionPath = new List<MTuple>();
         start = startNode.ToString();
         goal = goalNode.ToString();
+        innerStart = "";
+        innerGoal = "";
+        startCluster = Nodes.nodeBook[startNode].transform.parent.gameObject.GetHashCode().ToString();
+        goalCluster = Nodes.nodeBook[goalNode].transform.parent.gameObject.GetHashCode().ToString();
+
+
         current = "";
     }
 
@@ -29,15 +43,73 @@ public class Cluster : AStar
     /// </summary>
     public void doSearch()
     {
+        float gn, hn, fn;
+
+        if (startCluster == goalCluster)
+        {
+            innerStart = start;
+            innerGoal = goal;
+            doInnerSearch();
+        }
+        else
+        {
+            ClusterPath cPath = Nodes.clusterTable[int.Parse(startCluster)][int.Parse(goalCluster)];
+            if (cPath.getFirst() != start)
+            {// do A* search in this cluster till hit the exit
+                innerStart = start;
+                innerGoal = cPath.getFirst();
+                doInnerSearch();
+            }
+            else
+            {
+                innerGoal = cPath.getLast();
+                gn = 0.0f;
+                hn = getHeuristic(Nodes.nodeBook[int.Parse(start)].transform.position);
+                fn = gn + hn;
+                MTuple root = new MTuple(start, gn, "", fn);
+                closedList.Add(start, root);
+            }
+
+            openList.Clear();
+
+            innerGoal = cPath.getLast();
+
+
+            if (cPath.path.Count > 2)
+            {
+                doClusterTransition(cPath);
+            }
+
+            // goal cluster
+
+            innerStart = cPath.getLast();
+            innerGoal = goal;
+            gn = closedList[cPath.path[cPath.path.Count - 2]].gn
+                + Nodes.edgeBook[int.Parse(cPath.getLast())][int.Parse(cPath.path[cPath.path.Count - 2])];
+            hn = getHeuristic(Nodes.nodeBook[int.Parse(cPath.getLast())].transform.position);
+            fn = gn + hn;
+            MTuple transitionNode = new MTuple((cPath.getLast()), gn, cPath.path[cPath.path.Count - 2], fn);
+            openList.Add(innerStart, transitionNode);
+            doInnerSearch();
+        }
+
+        filterSolutionPath();
+}
+
+    /// <summary>
+    /// search with Cluster heuristic
+    /// </summary>
+    public void doInnerSearch()
+    {
         if (openList.Count == 0)
         {
             float gn = 0.0f;
-            float hn = getHeuristic(Nodes.nodeBook[int.Parse(start)].transform.position);
+            float hn = getHeuristic(Nodes.nodeBook[int.Parse(innerStart)].transform.position);
             float fn = gn + hn;
-            MTuple root = new MTuple(start, gn, "", fn);
+            MTuple root = new MTuple(innerStart, gn, "", fn);
 
-            openList.Add(start, root);
-            doSearch();
+            openList.Add(innerStart, root);
+            doInnerSearch();
         }
         else
         {
@@ -49,72 +121,82 @@ public class Cluster : AStar
             }
             MTuple node = sortedOpenList[0].Value;
 
-            foreach (KeyValuePair<string, MTuple> openNode in sortedOpenList)
-            {
-                Debug.Log("here [" + openNode.Value.hashNode + "|" + openNode.Value.gn + "|"
-                    + openNode.Value.edgeNode + "]\n");
-            }
-
             openList.Remove(node.hashNode);
-            if (closedList.ContainsKey(node.hashNode))
-            {
-                Debug.Log("here" + node.hashNode + "|" + openList.Count);
-            }
-
 
             if (!closedList.ContainsKey(node.hashNode))
             {
-                //Nodes.nodeBook[int.Parse(node.hashNode)].GetComponent<Renderer>().material.color = new Color(0.0f,1.0f,0.0f);
                 //getChildren(node);
                 closedList.Add(node.hashNode, node);
             }
 
-            Debug.Log("here2" + node.hashNode + "|" + openList.Count);
-            if (goal != node.hashNode)
+            if (innerGoal != node.hashNode)
             {
                 getChildren(node);
                 //closedList.Add(node.hashNode, node);
-                doSearch();
+                doInnerSearch();
             }
             else
             {
-                filterSolutionPath();
+                //filterSolutionPath();
             }
+
         }
     }
 
+    void doClusterTransition(ClusterPath cPath)
+    {
+        for(int i = 1; i < cPath.path.Count-1; ++i)
+        {
+            float gn = closedList[cPath.path[i - 1]].gn + Nodes.edgeBook[int.Parse(cPath.path[i])][int.Parse(cPath.path[i - 1])];
+            float hn = getHeuristic(Nodes.nodeBook[int.Parse(cPath.path[i])].transform.position);
+            float fn = gn + hn;
+            MTuple transitionNode = new MTuple((cPath.path[i]), gn, cPath.path[i - 1], fn);
+            closedList.Add(transitionNode.hashNode, transitionNode);
+        }
+
+    }
 
     void getChildren(MTuple node)
     {
 
+        string currentCluster = "";
+
+        
+        Transform currentClu = Nodes.nodeBook[int.Parse(node.hashNode)].transform.parent;
+        currentCluster = currentClu.gameObject.GetHashCode().ToString();
+
         Dictionary<int, float> children = Nodes.edgeBook[int.Parse(node.hashNode)];
         foreach (KeyValuePair<int, float> childNode in children)
         {
-            float gn = node.gn + childNode.Value;
-            float hn = getHeuristic(Nodes.nodeBook[childNode.Key].transform.position);
-            float fn = gn + hn;
-            string childHashNode = childNode.Key.ToString();
-            MTuple child = new MTuple(childHashNode, gn, node.hashNode, fn);
-
-
-            Debug.Log("here ^ [" + child.hashNode + "|" + child.fn + "|"
-                    + child.edgeNode + "]\n");
-            if (childHashNode != node.hashNode)
+            string clusterHC = "";
+            Transform cluTransfer = Nodes.nodeBook[childNode.Key].transform.parent;
+            clusterHC = cluTransfer.gameObject.GetHashCode().ToString();
+            if (clusterHC == currentCluster)
+            //if (true)
             {
-                if (openList.ContainsKey(childHashNode))
+                float gn = node.gn + childNode.Value;
+                float hn = getHeuristic(Nodes.nodeBook[childNode.Key].transform.position);
+                float fn = gn + hn;
+                string childHashNode = childNode.Key.ToString();
+                MTuple child = new MTuple(childHashNode, gn, node.hashNode, fn);
+
+                if (childHashNode != node.hashNode)
                 {
-                    if (openList[childHashNode].fn > fn)
+                    if (openList.ContainsKey(childHashNode))
                     {
-                        openList[childHashNode] = child;
+                        if (openList[childHashNode].fn > fn)
+                        {
+                            openList[childHashNode] = child;
+                        }
                     }
-                }
-                else if (!closedList.ContainsKey(childHashNode))
-                {
-                    openList.Add(childHashNode, child);
-                }
+                    else if (!closedList.ContainsKey(childHashNode))
+                    {
+                        openList.Add(childHashNode, child);
+                    }
 
+                }
             }
-
+            
 
         }
 
@@ -127,8 +209,34 @@ public class Cluster : AStar
     /// <returns></returns>
     float getHeuristic(Vector3 pos)
     {
-        Vector3 dir = Nodes.nodeBook[int.Parse(goal)].transform.position - pos;
-        return dir.magnitude;
+        float hn = 0.0f;
+        if (startCluster != goalCluster)
+        {
+            ClusterPath cPath = Nodes.clusterTable[int.Parse(startCluster)][int.Parse(goalCluster)];
+            if(innerGoal == cPath.getFirst())
+            {
+                Vector3 dir = Nodes.nodeBook[int.Parse(innerGoal)].transform.position - pos;
+                Vector3 dir2 = Nodes.nodeBook[int.Parse(cPath.getFirst())].transform.position 
+                    - Nodes.nodeBook[int.Parse(innerGoal)].transform.position;
+                Vector3 dir3 = Nodes.nodeBook[int.Parse(goal)].transform.position 
+                    - Nodes.nodeBook[int.Parse(cPath.getFirst())].transform.position;
+                
+                hn = dir.magnitude + dir2.magnitude + dir3.magnitude;
+            }
+            else
+            {
+                Vector3 dir = Nodes.nodeBook[int.Parse(innerGoal)].transform.position - pos;
+                Vector3 dir2 = Nodes.nodeBook[int.Parse(goal)].transform.position - Nodes.nodeBook[int.Parse(innerGoal)].transform.position;
+                hn = dir.magnitude + dir2.magnitude;
+            }
+        }
+        else
+        {
+            Vector3 dir = Nodes.nodeBook[int.Parse(goal)].transform.position - pos;
+            hn = dir.magnitude;
+        }
+
+        return hn;
     }
 
 

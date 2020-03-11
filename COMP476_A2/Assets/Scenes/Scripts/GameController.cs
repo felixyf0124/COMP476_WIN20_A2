@@ -36,7 +36,7 @@ public class GameController : MonoBehaviour
         
         pickedNodes = new List<GameObject>();
 
-        switchSearchMode(2);
+        switchSearchMode(3);
     }
 
     // Update is called once per frame
@@ -76,7 +76,7 @@ public class GameController : MonoBehaviour
             //{
             //    pickedNodes[i].GetComponent<Renderer>().material.color = Colors.lightBlue;
             //}
-
+            debug.text = "";
             pickedNodes.Clear();
             resetNodesAndLinks();
         }
@@ -185,7 +185,7 @@ public class GameController : MonoBehaviour
                         List<MTuple> path  = aStar.getSolutionPath();
 
                         colorPathFindingResult(openList, closedList, path);
-                        
+
                     }
                 }
             }
@@ -200,18 +200,15 @@ public class GameController : MonoBehaviour
     /// <param name="path"></param>
     void colorPathFindingResult(Dictionary<string, MTuple> openList, Dictionary<string, MTuple> closedList, List<MTuple> path)
     {
-        debug.text += "------" + "\n";
 
         foreach (KeyValuePair<string, MTuple> node in openList)
         {
-            debug.text += node.Value.hashNode + "|" + node.Value.gn + "|" + node.Value.edgeNode + "\n";
 
             Nodes.nodeBook[int.Parse(node.Key)].GetComponent<Renderer>().material.color
                 = new Color(1.0f, 1.0f, 1.0f);
         }
         foreach (KeyValuePair<string, MTuple> node in closedList)
         {
-            debug.text += node.Value.hashNode + "|" + node.Value.gn + "|" + node.Value.edgeNode + "\n";
             Nodes.nodeBook[int.Parse(node.Key)].GetComponent<Renderer>().material.color
                 = new Color(0.0f, 0.0f, 0.0f);
         }
@@ -221,7 +218,6 @@ public class GameController : MonoBehaviour
             Color col = new Color(1.0f, i / (float)(path.Count - 1), 0.0f);
             Nodes.nodeBook[int.Parse(path[i].hashNode)].GetComponent<Renderer>().material.color
                 = col;
-            debug.text += path[i].hashNode + "|" + path[i].gn + "|" + path[i].edgeNode + "\n";
             if (i < path.Count - 1)
             {
                 Color col2 = new Color(1.0f, (i + 1.0f) / (float)(path.Count - 1), 0.0f);
@@ -356,9 +352,9 @@ public class GameController : MonoBehaviour
 
 
 
-    void switchSearchMode(int i)
+    void switchSearchMode(int caseId)
     {
-        switch (i)
+        switch (caseId)
         {
             case 1:
                 searchMode = 1;
@@ -411,6 +407,23 @@ public class GameController : MonoBehaviour
                 searchModeTXT = "Search Mode: \n"
                 + "g(n): cost-so-far \n"
                 + "h(n): Cluster \n";
+
+                aStar = new Cluster();
+                if (pickedNodes.Count == 2)
+                {
+                    aStar.initial(pickedNodes[0].GetHashCode(), pickedNodes[1].GetHashCode());
+                    aStar.doSearch();
+
+                    Dictionary<string, MTuple> openList = aStar.getOpenList();
+
+                    Dictionary<string, MTuple> closedList = aStar.getClosedList();
+
+                    List<MTuple> path = aStar.getSolutionPath();
+
+                    colorPathFindingResult(openList, closedList, path);
+
+                }
+
                 break;
         }
     }

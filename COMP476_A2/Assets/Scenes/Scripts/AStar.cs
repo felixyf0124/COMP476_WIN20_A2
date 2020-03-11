@@ -28,6 +28,7 @@ public struct MTuple
         this.fn = fn;
     }
 }
+
 public interface AStar
 {
     void initial(int startNode, int goalNode);
