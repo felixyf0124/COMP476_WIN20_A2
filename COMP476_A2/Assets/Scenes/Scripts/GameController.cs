@@ -116,6 +116,8 @@ public class GameController : MonoBehaviour
             switchSearchMode(3);
         }
 
+        gameState.text = searchModeTXT;
+
     }
 
     void enableCursor()
